@@ -10,10 +10,12 @@
 
     </script>
     <script>
-        var features = [];
+        var features = {};
 
+        if (info[0].length === 3){
+            features['blue']=[];
         for (var i = 1; i < info.length; i++) {
-            features.push({
+            features['blue'].push({
                 'type': 'Feature',
                 'properties': {
                     'description':
@@ -24,8 +26,34 @@
                     'coordinates': [parseFloat(info[i][1]), parseFloat(info[i][2])]
                 }
             })
+        }}
+
+        else if (info[0].length > 3){
+            for (let i = 0; i < info.length; i++) {
+                console.log(info[i][3])
+                if (! Object.keys(features).includes(info[i][3])){
+                    features[info[i][3]]=[]
+                }
+
+            features[info[i][3]].push({
+                'type': 'Feature',
+                'properties': {
+                    'description':
+                        '<strong><p>' + info[i][0] + '</p></strong>'
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [parseFloat(info[i][1]), parseFloat(info[i][2])]
+                }
+            })
+        }}
+        else{
+            alert("less than 3 columns can not be displayed")
         }
-        ;
+
+
+
+
         console.log(features);
     </script>
     <style>
@@ -63,13 +91,14 @@
         zoom: 11.15
     });
 
+    for (let key in features){
 
     map.on('load', () => {
         map.addSource('places', {
             'type': 'geojson',
             'data': {
                 'type': 'FeatureCollection',
-                'features': features
+                'features': features[key]
 
             }
         });
@@ -79,12 +108,13 @@
             'type': 'circle',
             'source': 'places',
             'paint': {
-                'circle-color': '#4264fb',
+                'circle-color': key,
                 'circle-radius': 4,
                 'circle-stroke-width': 2,
                 'circle-stroke-color': '#ffffff'
             }
-        });
+        })
+
 
         // Create a popup, but don't add it to the map yet.
         const popup = new mapboxgl.Popup({
@@ -116,7 +146,7 @@
             map.getCanvas().style.cursor = '';
             popup.remove();
         });
-    });
+    })}
 </script>
 
 </body>
